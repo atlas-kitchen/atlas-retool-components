@@ -1,1 +1,62 @@
- 
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Thorough Reading of Attached Links/URLs
+globs: *.mdc
+---
+# Thorough Reading of Attached Links/URLs
+
+Ensure that the agent thoroughly reads and understands any attached links or URLs before generating responses, particularly when dealing with API documentation.
+
+<rule>
+name: thorough_reading_of_links
+description: Standards for ensuring agents read and adhere to attached URLs, with a focus on API documentation
+filters:
+  # Match any .mdc files
+  - type: file_extension
+    pattern: "\\.mdc$"
+  # Match files that look like Cursor rules
+  - type: content
+    pattern: "(?s)<rule>.*?</rule>"
+  # Match file creation events
+  - type: event
+    pattern: "file_create"
+
+actions:
+  - type: reject
+    conditions:
+      - pattern: "^(?!\\.\\/\\.cursor\\/rules\\/.*\\.mdc$)"
+        message: "Cursor rule files (.mdc) must be placed in the .cursor/rules directory"
+
+  - type: suggest
+    message: |
+      When ensuring thorough reading of URLs:
+
+      1. **Read Thoroughly**: The agent must read through the entire content of the attached link or URL, especially if it is an API document.
+
+      2. **Adhere to Documentation**: When generating code based on an API document, the agent must stick closely to the instructions and examples provided in the document.
+
+      3. **Avoid Hallucinations**: The agent must avoid generating information or code that is not explicitly supported by the content of the URL.
+
+      4. **Verify Information**: Cross-check the information from the URL with the response to ensure accuracy and consistency.
+
+      5. **Use Examples**: Where possible, use examples from the documentation to illustrate the response.
+
+      6. **Clarify Ambiguities**: If there is any ambiguity in the documentation, the agent should seek clarification before proceeding with code generation.
+
+examples:
+  - input: |
+      # Bad: Generated code does not adhere to API documentation
+      incorrect-code-example
+
+      # Good: Generated code adheres to API documentation
+      correct-code-example
+    output: "Correctly generated code based on thorough reading of API documentation"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

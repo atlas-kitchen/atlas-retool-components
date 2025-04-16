@@ -1,6 +1,4 @@
-interface ParsedDataItem {
-  [key: string]: string | number | boolean | null | undefined
-}
+import { ParsedDataItem } from './types';
 
 /**
  * Truncate a string to a specific length and add ellipsis if needed

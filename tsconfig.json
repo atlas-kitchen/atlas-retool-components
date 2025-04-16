@@ -11,5 +11,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["**/*.tsx", "**/*.ts", "src/components/Importer.jsx"]
+  "include": ["**/*.tsx", "**/*.ts", "src/components/Importer.jsx", "src/components/geocodingService.ts"]
 }

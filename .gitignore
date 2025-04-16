@@ -11,3 +11,5 @@ analyze.js
 retool-custom-component-manifest.json
 dist/*
 !dist/.placeholder
+.taskmaster/
+.cursor/
