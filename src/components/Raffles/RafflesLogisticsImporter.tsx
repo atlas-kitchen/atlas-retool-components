@@ -5,16 +5,24 @@ import { type FC, useEffect, useRef } from 'react'
 import { Retool } from '@tryretool/custom-component-support'
 
 // Import from extracted modules
-import { truncate, sanitizeDataItem } from './utils'
+import { sanitizeDataItem } from './utils'
 import { getImporterSheets } from './importerConfig'
 
+/**
+ * RafflesLogisticsImporter Component
+ *
+ * This component is responsible for rendering the logistics importer.
+ * It uses the Retool state hooks to manage line items and results.
+ *
+ * @returns {JSX.Element} The rendered importer component
+ */
 export const RafflesLogisticsImporter: FC = () => {
   // Initialize component and set default settings
   const containerRef = useRef<HTMLDivElement>(null)
   Retool.useComponentSettings({ defaultHeight: 300, defaultWidth: 200 })
 
   // Retool state hooks
-  const [lineItems, setlineItems] = Retool.useStateArray({
+  const [lineItems] = Retool.useStateArray({
     name: 'lineItems',
     description: 'Line items for validation',
     inspector: 'text'
@@ -31,32 +39,36 @@ export const RafflesLogisticsImporter: FC = () => {
     name: 'Upload successful'
   })
 
+  // Function to generate item columns for the importer
+  const generateItemColumns = (items: any[]) => {
+    return items
+      .filter(
+        (item): item is { id: string | number; name: string } =>
+          !!item &&
+          typeof item === 'object' &&
+          'id' in item &&
+          'name' in item &&
+          typeof item.name === 'string'
+      )
+      .map((item) => {
+        const safeId = typeof item.id === 'undefined' ? '' : String(item.id)
+        const safeName =
+          typeof item.name === 'string' ? item.name : String(item.name || '')
+        const label = `[#${safeId}] ${safeName}`
+
+        return {
+          label: label,
+          suggestedMappingKeywords: [label],
+          id: String(item.id),
+          type: 'number' as const,
+          validators: [{ validate: 'is_integer' as const }]
+        }
+      })
+  }
+
   // Generate item columns for the importer
   const itemColumns = Array.isArray(lineItems)
-    ? lineItems
-        .filter(
-          (item): item is { id: string | number; name: string } =>
-            !!item &&
-            typeof item === 'object' &&
-            'id' in item &&
-            'name' in item &&
-            typeof item.name === 'string'
-        )
-        .map((item) => {
-          // Create a safe string for the label
-          const safeId = typeof item.id === 'undefined' ? '' : String(item.id)
-          const safeName =
-            typeof item.name === 'string' ? item.name : String(item.name || '')
-          const label = `[#${safeId}] ${safeName}`
-
-          return {
-            label: label,
-            suggestedMappingKeywords: [label],
-            id: String(item.id),
-            type: 'number' as const,
-            validators: [{ validate: 'is_integer' as const }]
-          }
-        })
+    ? generateItemColumns(lineItems)
     : []
 
   // Initialize the importer component

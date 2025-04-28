@@ -1,13 +1,32 @@
 import { transform } from "lodash";
 
+// Define TypeScript interfaces for the configuration
+interface ColumnConfig {
+  label: string;
+  suggestedMappingKeywords: string[];
+  id: string;
+  type: 'string' | 'number' | 'enum';
+  typeArguments?: {
+    values: { label: string; value: string }[];
+  };
+  validators: { validate: string; error?: string; regex?: RegExp; key?: string; validateFn?: (value: any, row: any) => string | null }[];
+  transformers?: { transformer: string; key?: string; transformFn?: (value: any) => any }[];
+}
+
+interface SheetConfig {
+  id: string;
+  label: string;
+  columns: ColumnConfig[];
+}
+
 /**
  * Generate the sheet configuration for the importer
  * 
  * @param itemColumns Optional columns for line items
  * @returns Sheet configuration for the importer
  */
-export const getImporterSheets = (itemColumns: any[] = []) => {
-  const sheets = [
+export const getImporterSheets = (itemColumns: any[] = []): SheetConfig[] => {
+  const sheets: SheetConfig[] = [
     {
       id: 'logistics_manifest',
       label: 'Logistics Manifest',
@@ -38,7 +57,8 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
           suggestedMappingKeywords: ['company'],
           id: 'recipient_company',
           type: 'string' as const,
-          transformers: [{ transformer: 'strip' }]
+          transformers: [{ transformer: 'strip' }],
+          validators: []
         },
         {
           label: 'Recipient name',
@@ -144,7 +164,8 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
           label: 'Delivery address line2',
           suggestedMappingKeywords: ['delivery address line2'],
           id: 'address_line2',
-          type: 'string' as const
+          type: 'string' as const,
+          validators: []
         },
         {
           label: 'Delivery postal code',
@@ -182,7 +203,8 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
           label: 'Notes',
           suggestedMappingKeywords: ['notes'],
           id: 'notes',
-          type: 'string' as const
+          type: 'string' as const,
+          validators: []
         }
       ]
     }
@@ -192,14 +214,9 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
   if (itemColumns.length > 0) {
     const safeItemColumns = itemColumns.map((column) => ({
       ...column,
-      // Further ensure label and suggestedMappingKeywords are strings
       label: String(column.label || ''),
-      suggestedMappingKeywords: Array.isArray(
-        column.suggestedMappingKeywords
-      )
-        ? column.suggestedMappingKeywords.map((keyword: any) =>
-            String(keyword || '')
-          )
+      suggestedMappingKeywords: Array.isArray(column.suggestedMappingKeywords)
+        ? column.suggestedMappingKeywords.map((keyword: any) => String(keyword || ''))
         : [String(column.id || '')],
       type: 'number' as const,
       validators: [
@@ -210,28 +227,21 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
       ],
       transformers: [
         { transformer: 'strip' },
-        { transformer: 'custom',
-          key: 'defaultToZero',
-          transformFn: (value: any) => {
-            if (typeof value === 'string' && value.trim() === '') {
-              return 0;
-            }
+        { transformer: 'custom', key: 'defaultToZero', transformFn: (value: any) => {
+          if (typeof value === 'string' && value.trim() === '') {
+            return 0;
+          }
+          return value;
+        }},
+        { transformer: 'custom', key: 'transformToNumber', transformFn: (value: any) => {
+          if (typeof value === 'number') {
             return value;
           }
-        },
-        {
-          transformer: 'custom',
-          key: 'transformToNumber',
-          transformFn: (value: any) => {
-            if (typeof value === 'number') {
-              return value;
-            }
-            if (typeof value === 'string') {
-              return parseInt(value);
-            }
-            return value;
+          if (typeof value === 'string') {
+            return parseInt(value);
           }
-        }
+          return value;
+        }}
       ]
     }));
     
