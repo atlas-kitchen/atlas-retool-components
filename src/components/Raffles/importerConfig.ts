@@ -127,7 +127,18 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
           id: 'address_line1',
           type: 'string' as const,
           transformers: [{ transformer: 'strip' }],
-          validators: [{ validate: 'required' }]
+          validators: [
+            {
+              validate: 'custom',
+              key: 'conditionallyRequiredAddress',
+              validateFn: (value: any, row: any) => {
+                if (row.fulfilment_type === 'delivery' && !value) {
+                  return 'Address is required for delivery orders';
+                }
+                return null;
+              }
+            }
+          ]
         },
         {
           label: 'Delivery address line2',
@@ -150,11 +161,20 @@ export const getImporterSheets = (itemColumns: any[] = []) => {
             { transformer: 'strip' }
           ],
           validators: [
-            { validate: 'required' },
             {
-              validate: 'regex_matches',
-              regex: /^\d{6}$/,
-              error: 'This postal code is not valid'
+              validate: 'custom',
+              key: 'conditionallyRequiredPostal',
+              validateFn: (value: any, row: any) => {
+                if (row.fulfilment_type === 'delivery') {
+                  if (!value) {
+                    return 'Postal code is required for delivery orders';
+                  }
+                  if (!/^\d{6}$/.test(value)) {
+                    return 'This postal code is not valid';
+                  }
+                }
+                return null;
+              }
             }
           ]
         },

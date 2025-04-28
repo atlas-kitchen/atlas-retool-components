@@ -1,1 +1,1 @@
-export { ImporterComponent } from './components/Importer'
+export { RafflesLogisticsImporter } from './components/Raffles/RafflesLogisticsImporter'

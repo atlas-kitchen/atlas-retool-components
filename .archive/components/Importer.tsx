@@ -97,7 +97,7 @@ export const ImporterComponent: FC = () => {
           const label = `[#${safeId}] ${safeName}`
 
           return {
-            label: truncate(label, 31),
+            label: label,
             suggestedMappingKeywords: [`[#${safeId}]`],
             id: String(item.id),
             type: 'number' as const,

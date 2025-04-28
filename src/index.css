@@ -1,0 +1,46 @@
+:root {
+  /* Primary colors */
+  --hello-csv-color-primary: #4F46E5;
+  --hello-csv-color-primary-light: #66b3ff;
+  --hello-csv-color-primary-extra-light: #cce7ff;
+
+  /* Secondary and tertiary colors */
+  --hello-csv-color-secondary: #E0E7FF;
+  --hello-csv-color-tertiary: #F6F6F6;
+  --hello-csv-color-tertiary-light: #5bc0de;
+
+  /* Status colors */
+  --hello-csv-color-success: #128747;
+  --hello-csv-color-success-light: #4ade80;
+  --hello-csv-color-success-extra-light: #f0fdf4;
+  
+  --hello-csv-color-danger: #E73E3E;
+  --hello-csv-color-danger-light: #f5c6cb;
+  --hello-csv-color-danger-extra-light: #fef2f2;
+  
+  --hello-csv-color-warning: #D17823;
+  --hello-csv-color-warning-light: #facc15;
+  --hello-csv-color-warning-extra-light: #fefce8;
+
+  /* UI colors */
+  --hello-csv-color-info: #3C92DD;
+  --hello-csv-color-muted: #f9fafb;
+  --hello-csv-color-muted-light: #f3f4f6;
+}
+
+/* Base styles for the importer container */
+.importer-container {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  padding: 20px;
+}
+
+div.csv-importer > div.h-full.p-10 {
+  padding: 0;
+  div.flex.h-full.flex-col {
+    box-shadow: none;
+  }
+}
