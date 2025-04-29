@@ -1,4 +1,4 @@
-import { renderImporter } from 'react-importer/peer'
+import { renderImporter, type SheetState } from 'react-importer/peer'
 import 'react-importer/peer/index.css'
 import '../../index.css'
 import { type FC, useEffect, useRef } from 'react'
@@ -7,6 +7,11 @@ import { Retool } from '@tryretool/custom-component-support'
 // Import from extracted modules
 import { sanitizeDataItem } from './utils'
 import { getImporterSheets } from './importerConfig'
+
+interface MappedData {
+  rows: Record<string, string | number>[]
+  [key: string]: any
+}
 
 /**
  * RafflesLogisticsImporter Component
@@ -82,13 +87,31 @@ export const RafflesLogisticsImporter: FC = () => {
         allowManualDataEntry: true,
         sheets: sheets as any, // Type assertion to bypass complex type errors
 
-        onComplete: async (data, onProgress) => {
-          // const parsedData = data?.parsedFile?.data || []
-          // setParsedData(parsedData)
+        onDataColumnsMapped: (data: SheetState[]) => {
+          // Filter out rows where none of the itemColumns have non-zero values
+          return data.map((sheet) => ({
+            ...sheet,
+            rows: sheet.rows.filter((row) => {
+              // Check if any itemColumn has a non-zero value
+              return itemColumns.some((col) => {
+                const value = Number(row[col.id])
+                return !isNaN(value) && value !== 0
+              })
+            })
+          }))
+        },
 
+        onComplete: async (data, onProgress) => {
+          // Filter the sheet data to remove rows with no non-zero values
           const sheetData = Array.isArray(data?.sheetData?.[0]?.rows)
-            ? data?.sheetData?.[0]?.rows.map(sanitizeDataItem)
+            ? data?.sheetData?.[0]?.rows.map(sanitizeDataItem).filter((row) =>
+                itemColumns.some((col) => {
+                  const value = Number(row[col.id])
+                  return !isNaN(value) && value !== 0
+                })
+              )
             : []
+
           setResult(JSON.parse(JSON.stringify(sheetData)))
           onProgress(100)
           uploadSuccessful()
